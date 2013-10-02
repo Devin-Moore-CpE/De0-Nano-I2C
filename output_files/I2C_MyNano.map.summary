@@ -1,0 +1,14 @@
+Analysis & Synthesis Status : Successful - Mon Sep 30 19:42:08 2013
+Quartus II 64-Bit Version : 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition
+Revision Name : I2C_MyNano
+Top-level Entity Name : I2C_MyNano
+Family : Cyclone IV E
+Total logic elements : 735
+    Total combinational functions : 478
+    Dedicated logic registers : 528
+Total registers : 528
+Total pins : 34
+Total virtual pins : 0
+Total memory bits : 12,288
+Embedded Multiplier 9-bit elements : 0
+Total PLLs : 0

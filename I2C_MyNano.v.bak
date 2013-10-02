@@ -1,0 +1,134 @@
+module I2C_MyNano()
+
+CLOCK_50,
+
+
+LED,
+
+
+KEY,
+
+SW,
+
+I2C_SCL,
+
+I2C_SDA,
+
+COUNT,
+
+SD_COUNTER
+
+);
+
+
+
+
+input CLOCK_50;
+
+output [7:0]  LED;
+
+input [1:0] KEY;
+//////////////////This is for the EEPROM
+output   I2C_SCL;
+
+inout   	I2C_SDA;
+//////////////////Keep track of clocks
+output	[5:0] 	SD_COUNTER;
+
+output  	[9:0]		COUNT;
+
+//////////////////////Reg/Wire Declarations
+wire		reset_n;
+
+
+reg					GO;
+reg		[6:0]		SD_COUNTER;
+reg					SDI;
+reg					SCL;
+reg		[9:0]		COUNT;
+
+
+//////////////Structural Coding///////////
+
+assign 	reset_n = Key[0];
+
+//////////////The Clock values will need to be changed//////////
+always @ (posedge CLOCK_50) COUNT <= COUNT +1;
+
+//////////////This Allows for one write opperation////////
+always @ (posedge COUNT[9] or negedge reset_n)
+begin
+	if(!reset_n)
+		SD_COUNTER <= 0;
+	else
+	begin	
+		if(!GO)
+			SD_COUNTER <= 0;
+		else
+			if(SD_COUNTER < 33)
+				SD_COUNTER <= SD_COUNTER+1;
+				
+	end
+end
+
+//I2C Operation, Write////
+
+always @ (posedge COUNT[9] or negedge reset_n)
+begin
+	if(!reset_n)
+	begin	
+		SCL <= 1;
+		SDI <= 1;
+	end
+	else
+	case (SD_COUNTER)
+		6'd0		: begin SDI <=1; SCL <= 1;end
+		////////START///////////
+		6'd1		:	SDI <= 0;
+		6'd2		:	SCL <= 0;
+		////////I2C Adress///////
+		6'd3		:	SDI <= 1;
+		6'd4		:	SDI <= 0;
+		6'd5		:	SDI <= 1;
+		6'd6		:	SDI <= 0;
+		6'd7		:	SDI <= 0;
+		6'd8		:	SDI <= 0;
+		6'd9		:	SDI <= 0;
+		6'd10		:	SDI <= 0;
+		6'd11		:	SDI <= 1'bz;
+		/////////Memory Adress///////////
+		6'd12		:	SDI <= 0;
+		6'd13		:	SDI <= 0;
+		6'd14		:	SDI <= 0;
+		6'd15		:	SDI <= 0;
+		6'd16		:	SDI <= 0;
+		6'd17		:	SDI <= 0;
+		6'd18		:	SDI <= 0;
+		6'd19		:	SDI <= 0;		
+		6'd20		:	SDI <= 1'bz;
+		//////////Data////////////////
+		6'd21		:	SDI <= 1;
+		6'd22		:	SDI <= 0;
+		6'd23		:	SDI <= 1;
+		6'd24		:	SDI <= 0;
+		6'd25		:	SDI <= 1;
+		6'd26		:	SDI <= 0;
+		6'd27		:	SDI <= 1;		
+		6'd28		:	SDI <= 0;
+		6'd29		:	SDI <= 1'bz;
+		////////////Stop////////////////
+		6'd30		:	begin SDI <= 1'b0; SCL <= 1'b1; end
+		6'd31		:	SDI <= 1'b1;
+	endcase
+end
+
+assign I2C_SCL = ((SD_COUNTER >=4) & (SD_COUNTER <=31))? ~COUNT[9] : SCL;
+assign I2C_SDA = SDI;
+
+endmodule
+
+
+
+
+
+
